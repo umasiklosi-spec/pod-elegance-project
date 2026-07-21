@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { Podcast } from "@/data/podcasts";
+import { podcasts, type Podcast } from "@/data/podcasts";
+
 
 type PlayerState = {
   current: Podcast | null;
@@ -10,9 +11,12 @@ type PlayerState = {
   history: string[];
   play: (p: Podcast) => void;
   toggle: () => void;
+  next: () => void;
+  previous: () => void;
   toggleLike: (id: string) => void;
   toggleFavorite: (id: string) => void;
   seek: (v: number) => void;
+
 };
 
 const PlayerContext = createContext<PlayerState | null>(null);
@@ -33,6 +37,21 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggle = useCallback(() => setIsPlaying((v) => !v), []);
+
+  const next = useCallback(() => {
+    if (!current) return;
+    const i = podcasts.findIndex((p) => p.id === current.id);
+    const nextP = podcasts[(i + 1) % podcasts.length];
+    play(nextP);
+  }, [current, play]);
+
+  const previous = useCallback(() => {
+    if (!current) return;
+    const i = podcasts.findIndex((p) => p.id === current.id);
+    const prevP = podcasts[(i - 1 + podcasts.length) % podcasts.length];
+    play(prevP);
+  }, [current, play]);
+
 
   const toggleLike = useCallback((id: string) => {
     setLiked((s) => {
@@ -69,9 +88,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [isPlaying, current]);
 
   const value = useMemo(
-    () => ({ current, isPlaying, progress, liked, favorites, history, play, toggle, toggleLike, toggleFavorite, seek }),
-    [current, isPlaying, progress, liked, favorites, history, play, toggle, toggleLike, toggleFavorite, seek],
+    () => ({ current, isPlaying, progress, liked, favorites, history, play, toggle, next, previous, toggleLike, toggleFavorite, seek }),
+    [current, isPlaying, progress, liked, favorites, history, play, toggle, next, previous, toggleLike, toggleFavorite, seek],
   );
+
 
   return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
 }
