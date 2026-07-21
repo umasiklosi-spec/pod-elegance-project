@@ -3,7 +3,7 @@ import { Pause, Play, SkipBack, SkipForward } from "lucide-react";
 import { usePlayer } from "@/contexts/PlayerContext";
 
 export function MiniPlayer() {
-  const { current, isPlaying, progress, toggle } = usePlayer();
+  const { current, isPlaying, progress, toggle, next, previous } = usePlayer();
   if (!current) return null;
 
   return (
@@ -39,7 +39,7 @@ export function MiniPlayer() {
             <p className="text-muted-foreground truncate text-xs">{current.author}</p>
           </Link>
           <div className="flex items-center gap-0.5">
-            <button className="text-muted-foreground hover:text-foreground hidden h-9 w-9 place-items-center rounded-full sm:grid" aria-label="Anterior">
+            <button onClick={previous} className="text-muted-foreground hover:text-foreground hidden h-9 w-9 place-items-center rounded-full sm:grid" aria-label="Anterior">
               <SkipBack className="h-4 w-4" />
             </button>
             <button
@@ -49,9 +49,10 @@ export function MiniPlayer() {
             >
               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="ml-0.5 h-4 w-4" />}
             </button>
-            <button className="text-muted-foreground hover:text-foreground hidden h-9 w-9 place-items-center rounded-full sm:grid" aria-label="Siguiente">
+            <button onClick={next} className="text-muted-foreground hover:text-foreground hidden h-9 w-9 place-items-center rounded-full sm:grid" aria-label="Siguiente">
               <SkipForward className="h-4 w-4" />
             </button>
+
           </div>
         </div>
       </div>
