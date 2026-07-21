@@ -37,12 +37,20 @@ const seedComments = [
 
 function PodcastDetail() {
   const { podcast } = Route.useLoaderData();
-  const { play, toggle, current, isPlaying, progress, liked, toggleLike, favorites, toggleFavorite } = usePlayer();
+  const { play, toggle, next, previous, current, isPlaying, progress, liked, toggleLike, favorites, toggleFavorite } = usePlayer();
   const isCurrent = current?.id === podcast.id;
   const isLiked = liked.has(podcast.id);
   const isFav = favorites.has(podcast.id);
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState(seedComments);
+  const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
+  const toggleCommentLike = (id: string) =>
+    setLikedComments((s) => {
+      const n = new Set(s);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+
 
   const related = podcasts.filter((p) => p.id !== podcast.id && p.category === podcast.category).slice(0, 4);
 
@@ -110,7 +118,7 @@ function PodcastDetail() {
           <span>{podcast.duration}</span>
         </div>
         <div className="mt-3 flex items-center justify-center gap-4">
-          <button className="text-muted-foreground hover:text-foreground" aria-label="Anterior">
+          <button onClick={previous} className="text-muted-foreground hover:text-foreground" aria-label="Anterior">
             <SkipBack className="h-5 w-5" />
           </button>
           <button
@@ -120,10 +128,11 @@ function PodcastDetail() {
           >
             {isCurrent && isPlaying ? <Pause className="h-5 w-5" /> : <Play className="ml-0.5 h-5 w-5" />}
           </button>
-          <button className="text-muted-foreground hover:text-foreground" aria-label="Siguiente">
+          <button onClick={next} className="text-muted-foreground hover:text-foreground" aria-label="Siguiente">
             <SkipForward className="h-5 w-5" />
           </button>
         </div>
+
       </section>
 
       {/* Comments */}
@@ -162,11 +171,16 @@ function PodcastDetail() {
               </div>
               <p className="mt-1 text-sm leading-relaxed">{c.text}</p>
               <div className="text-muted-foreground mt-2 flex items-center gap-3 text-[11px]">
-                <button className="hover:text-primary inline-flex items-center gap-1">
-                  <Heart className="h-3 w-3" /> {c.reacts}
+                <button
+                  onClick={() => toggleCommentLike(c.id)}
+                  className={`inline-flex items-center gap-1 transition ${likedComments.has(c.id) ? "text-primary" : "hover:text-primary"}`}
+                >
+                  <Heart className="h-3 w-3" fill={likedComments.has(c.id) ? "currentColor" : "none"} />
+                  {c.reacts + (likedComments.has(c.id) ? 1 : 0)}
                 </button>
                 <button className="hover:text-foreground">Responder</button>
               </div>
+
             </li>
           ))}
         </ul>
